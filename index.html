@@ -11,15 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="1791289876628.jpg">
-    <link rel="manifest" href='data:application/manifest+json,{
-        "name": "Tlaloc Meteo",
-        "short_name": "Tlaloc",
-        "start_url": "index.html",
-        "display": "standalone",
-        "background_color": "#1a1a1a",
-        "theme_color": "#4ecca3",
-        "icons": [{"src": "1791289876628.jpg", "sizes": "192x192", "type": "image/jpeg"}]
-    }'>
+    <link rel="manifest" href="manifest.json">
 
     <!-- Tailwind CSS per lo stile -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -185,7 +177,7 @@
         const weatherDashboard = document.getElementById('weather-dashboard');
 
         const weatherCodes = {
-            0: { text: "Cielo sereno", icon: "☀️️", bg: "bg-sunny" },
+            0: { text: "Cielo sereno", icon: "☀️", bg: "bg-sunny" },
             1: { text: "Principalmente sereno", icon: "🌤️", bg: "bg-sunny" },
             2: { text: "Parzialmente nuvoloso", icon: "⛅", bg: "bg-cloudy" },
             3: { text: "Nuvoloso", icon: "☁️", bg: "bg-cloudy" },
@@ -239,7 +231,7 @@
                 updateUI(data, cityName);
             } catch (err) {
                 loader.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
             }
         }
 
@@ -333,7 +325,6 @@
             }
         });
 
-        // Avvio di default su Roma (o geolocalizzazione automatica all'avvio)
         window.onload = () => {
             fetchWeatherData(41.9028, 12.4964, 'Roma');
         };
