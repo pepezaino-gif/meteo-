@@ -17,7 +17,7 @@
         "display": "standalone",
         "background_color": "#4ecca3",
         "theme_color": "#4ecca3",
-        "icons": [{"src": "1731289876628.jpg", "sizes": "192x192", "type": "image/png"}]
+        "icons": [{"src": "1731289876628.jpg", "sizes": "192x192", "type": "image/jpeg"}]
     }'>
 
     <!-- Tailwind CSS per lo stile -->
@@ -184,16 +184,15 @@
                     Radar Precipitazioni in Tempo Reale
                 </h3>
                 <div class="radar-container">
-                    <!-- Widget gratuito di RainViewer incorporato -->
                     <iframe id="radarIframe" src="https://www.rainviewer.com/weather-map?layer=radar&color=5&logo=0&title=0&mini=0&smooth=1&snow=1" allowfullscreen></iframe>
                 </div>
             </div>
 
-            <!-- Previsioni Orarie a scorrimento -->
+            <!-- Previsioni Orarie -->
             <div class="bg-white/5 backdrop-blur-sm p-6 rounded-3xl border border-white/10 shadow-xl">
                 <h3 class="text-2xl font-bold mb-4">Previsioni Orarie</h3>
                 <div id="hourlyForecast" class="flex gap-5 overflow-x-auto pb-4 -mb-2 snap-x snap-mandatory">
-                    <!-- Gli elementi orari saranno inseriti qui via JS -->
+                    <!-- Inserite via JS -->
                 </div>
             </div>
 
@@ -201,7 +200,7 @@
             <div class="bg-white/5 backdrop-blur-sm p-6 rounded-3xl border border-white/10 shadow-xl">
                 <h3 class="text-2xl font-bold mb-4">Previsioni a 7 Giorni</h3>
                 <div id="dailyForecast" class="space-y-3">
-                    <!-- Gli elementi giornalieri saranno inseriti qui via JS -->
+                    <!-- Inserite via JS -->
                 </div>
             </div>
 
@@ -215,7 +214,7 @@
         <p class="mt-2 font-bold">App creata per te da Tlaloc, il Dio della Pioggia.</p>
     </footer>
 
-    <!-- Codice JavaScript dell'App -->
+    <!-- Script -->
     <script>
         const cityInput = document.getElementById('cityInput');
         const btnLocate = document.getElementById('btnLocate');
@@ -227,7 +226,6 @@
         const dailyForecast = document.getElementById('dailyForecast');
         const appBody = document.getElementById('appBody');
 
-        // Mappatura codici meteo WMO in icone e testo (italiano)
         const wmoIcons = {
             0: { icon: '☀️', desc: 'Sereno' },
             1: { icon: '🌤️', desc: 'Prevalentemente sereno' },
@@ -243,7 +241,7 @@
             61: { icon: '🌦️', desc: 'Pioggia leggera' },
             63: { icon: '🌧️', desc: 'Pioggia moderata' },
             65: { icon: '🌧️', desc: 'Pioggia forte' },
-            66: { icon: '🌧️', desc: 'Pioggia gelata leggera' },
+            66: { icon: '🌧️️', desc: 'Pioggia gelata leggera' },
             67: { icon: '🌧️', desc: 'Pioggia gelata forte' },
             71: { icon: '❄️', desc: 'Nevicata leggera' },
             73: { icon: '❄️', desc: 'Nevicata moderata' },
@@ -259,15 +257,13 @@
             99: { icon: '⛈️', desc: 'Temporale con grandine forte' },
         };
 
-        // Funzione per ottenere la direzione del vento
         function getWindDirection(degrees) {
             const sectors = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
             return sectors[Math.round(degrees / 22.5) % 16];
         }
 
-        // Funzione per cambiare lo sfondo in base al meteo
         function updateBackground(wmoCode, isDay) {
-            appBody.className = ''; // Reset
+            appBody.className = '';
             if (!isDay) {
                 appBody.classList.add('bg-night');
             } else if (wmoCode <= 1) {
@@ -279,23 +275,19 @@
             }
         }
 
-        // Funzione principale per recuperare i dati meteo
         async function fetchWeatherData(lat, lon, cityNameDisplay, isAutoDetect = false) {
             loader.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             weatherDashboard.classList.add('hidden');
 
             try {
-                // API Open-Meteo: 1 call per tutto (attuali, orari, giornalieri, radar)
                 const response = await fetch(
-                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,pressure_msl,visibility&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&forecast_days=10`
+                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,pressure_msl,visibility,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&forecast_days=10`
                 );
                 
                 if (!response.ok) throw new Error('Errore API');
 
                 const data = await response.json();
-
-                // --- 1. Aggiorna Dati Attuali ---
                 const current = data.current;
                 const weatherInfo = wmoIcons[current.weather_code];
                 
@@ -311,37 +303,17 @@
                 document.getElementById('humidity').innerText = current.relative_humidity_2m;
                 document.getElementById('pressure').innerText = current.pressure_msl;
                 document.getElementById('visibility').innerText = (current.visibility / 1000).toFixed(1);
-                
-                // Dati aggiuntivi da daily per precipitation_sum e uv_index (aggiunto dopo test)
                 document.getElementById('precipitationSum').innerText = data.daily.precipitation_sum[0];
-                // N.B.: Open-Meteo ha UV index solo su richiesta specifica in hourly o daily. Per semplicità MVP, usiamo un valore calcolato o lo rimuoviamo se non presente. Aggiunto manualmente al markup per completezza API, lo mostriamo come 'N/D' se non richiesto.
                 document.getElementById('uvIndex').innerText = 'N/D';
 
-                // Recupera direzione e velocità del vento e converti
-                const windSpeedKmH = (data.current.wind_speed_10m * 3.6).toFixed(1); // Dati API in m/s, converti in km/h
-                const windDir = getWindDirection(data.current.wind_direction_10m);
-                 // Nota: La richiesta API iniziale non includeva wind_speed_10m e wind_direction_10m. Aggiunta nel fetch sopra.
-                 // Aggiorniamo il fetch sopra per includere &current=...,wind_speed_10m,wind_direction_10m
-                 // Facciamo un secondo tentativo di fetch con il campo giusto, o correggiamo l'URL sopra. Corretto l'URL.
+                const windSpeedKmH = (current.wind_speed_10m * 3.6).toFixed(1);
+                const windDir = getWindDirection(current.wind_direction_10m);
+                document.getElementById('windSpeed').innerText = windSpeedKmH;
+                document.getElementById('windDirection').innerText = windDir;
 
-                // Riprova fetch con parametri completi:
-                 const response_v2 = await fetch(
-                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,pressure_msl,visibility,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&forecast_days=10`
-                 );
-                 const data_v2 = await response_v2.json();
-                 const current_v2 = data_v2.current;
-                 const windSpeedKmH_v2 = (current_v2.wind_speed_10m * 3.6).toFixed(1);
-                 const windDir_v2 = getWindDirection(current_v2.wind_direction_10m);
-                 document.getElementById('windSpeed').innerText = windSpeedKmH_v2;
-                 document.getElementById('windDirection').innerText = windDir_v2;
-
-                // --- 2. Aggiorna Mappa Radar ---
-                // Centra la mappa sulla località cercata
                 radarIframe.src = `https://www.rainviewer.com/weather-map?layer=radar&color=5&logo=0&title=0&mini=0&smooth=1&snow=1&lat=${lat}&lon=${lon}&zoom=9`;
 
-
-                // --- 3. Aggiorna Previsioni Orarie ---
-                hourlyForecast.innerHTML = ''; // Pulisci
+                hourlyForecast.innerHTML = '';
                 const currentHourIndex = data.hourly.time.findIndex(timeStr => new Date(timeStr).getHours() === now.getHours());
                 for (let i = currentHourIndex; i < currentHourIndex + 24; i++) {
                     if (i >= data.hourly.time.length) break;
@@ -363,8 +335,7 @@
                     hourlyForecast.innerHTML += hourEl;
                 }
 
-                // --- 4. Aggiorna Previsioni Settimanali ---
-                dailyForecast.innerHTML = ''; // Pulisci
+                dailyForecast.innerHTML = '';
                 for (let i = 0; i < 7; i++) {
                     const dayData = data.daily;
                     const time = new Date(dayData.time[i]);
@@ -397,20 +368,15 @@
             }
         }
 
-        // --- Gestione Eventi ---
-
-        // 1. Ricerca per città (al premere 'Invio')
         cityInput.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
                 const cityName = cityInput.value.trim();
                 if (cityName) {
                     try {
-                        // Usa Nominatim (di OpenStreetMap) per geolocalizzare la città
                         const geoResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cityName}`);
                         const geoData = await geoResponse.json();
                         if (geoData.length > 0) {
                             const { lat, lon, display_name } = geoData[0];
-                            // Prepara un nome città pulito (es. solo "Roma")
                             const displayNameFormatted = display_name.split(',')[0];
                             fetchWeatherData(lat, lon, displayNameFormatted);
                         } else {
@@ -423,14 +389,12 @@
             }
         });
 
-        // 2. Geolocalizzazione automatica
         btnLocate.addEventListener('click', () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
-                        // Per la geolocalizzazione, usiamo solo il nome della località approssimativa
-                         fetchWeatherData(latitude, longitude, 'La tua posizione', true);
+                        fetchWeatherData(latitude, longitude, 'La tua posizione', true);
                     },
                     (error) => {
                         errorMessage.innerText = "Geolocalizzazione non riuscita. Cerca una città manualmente.";
@@ -443,12 +407,9 @@
             }
         });
 
-        // --- Caricamento iniziale: Default su Roma ---
-        // La prima volta che l'utente apre l'app, carichiamo Roma
         window.onload = () => {
             fetchWeatherData(41.9028, 12.4964, 'Roma');
         };
-
     </script>
 </body>
 </html>
