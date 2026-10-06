@@ -7,6 +7,7 @@
     
     <!-- PWA Meta Tags per l'installabilità -->
     <meta name="theme-color" content="#4ecca3">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="1791289876628.jpg">
@@ -15,36 +16,33 @@
         "short_name": "Tlaloc",
         "start_url": "index.html",
         "display": "standalone",
-        "background_color": "#4ecca3",
+        "background_color": "#1a1a1a",
         "theme_color": "#4ecca3",
         "icons": [{"src": "1791289876628.jpg", "sizes": "192x192", "type": "image/jpeg"}]
     }'>
 
     <!-- Tailwind CSS per lo stile -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4ecca3',
-                        accent: '#36454F',
-                        darkBg: '#1a1a1a',
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
+        :root {
+            --primary: #4ecca3;
+            --accent: #36454f;
+            --dark-bg: #1a1a1a;
+        }
+        body {
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
         /* Stile personalizzato per il radar */
-        .radar-container {
+        #radar-container {
             position: relative;
             width: 100%;
             padding-top: 75%; /* Aspect Ratio 4:3 */
             overflow: hidden;
             border-radius: 1rem;
         }
-        .radar-container iframe {
+        #radar-container iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -53,73 +51,292 @@
             border: none;
         }
         /* Sfondi dinamici */
-        body.bg-sunny { background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%); }
+        body.bg-sunny { background: linear-gradient(to bottom, #4ecca3 0%, #0f2027 100%); }
         body.bg-rainy { background: linear-gradient(to bottom, #203a43 0%, #2c5364 100%); }
-        body.bg-cloudy { background: linear-gradient(to bottom, #485563 0%, #29323c 100%); }
-        body.bg-night { background: linear-gradient(to bottom, #0f2027 0%, #203a43 0%, #2c5364 100%); }
+        body.bg-cloudy { background: linear-gradient(to bottom, #393e46 0%, #222831 100%); }
+        body.bg-night { background: linear-gradient(to bottom, #0f2027 0%, #203a43 50%, #2c5364 100%); }
     </style>
 </head>
-<body class="bg-sunny text-white font-sans transition-colors duration-500 antialiased" id="appBody">
+<body class="bg-sunny text-white font-sans transition-colors duration-500 antialiased">
 
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-white/10 backdrop-blur-lg border-b border-white/10 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <img src="1791289876628.jpg" alt="Tlaloc Logo" class="w-10 h-10 rounded-full border-2 border-white/20 shadow-sm">
-                <h1 class="text-2xl font-bold tracking-tight">Tlaloc<span class="text-primary font-light">Meteo</span></h1>
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="1791289876628.jpg" alt="Tlaloc Logo" class="w-10 h-10 rounded-full border-2 border-white/20 shadow-sm object-cover">
+                <h1 class="text-xl font-bold tracking-wider">Tlaloc <span class="text-xs font-medium text-white/80">Meteo</span></h1>
             </div>
+            
             <div class="flex items-center gap-2">
-                <button id="btnLocate" class="p-2.5 bg-primary/20 hover:bg-primary/40 rounded-full transition duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                <button id="btn-geolocate" class="p-2.5 bg-primary/30 hover:bg-primary/40 rounded-full transition duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </button>
                 <div class="relative">
-                    <input type="text" id="cityInput" placeholder="Cerca città..." class="pl-10 pr-4 py-2.5 rounded-full bg-accent/60 text-white placeholder-gray-300 border border-white/10 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition w-40 sm:w-48">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <input type="text" id="city-input" placeholder="Cerca città..." class="pl-10 pr-4 py-2.5 rounded-full text-sm bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-primary w-36 sm:w-48 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white/60 absolute left-3.5 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Contenuto Principale -->
-    <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
-        
+    <main class="max-w-4xl mx-auto p-4 space-y-6 pt-6">
+
         <!-- Loader -->
-        <div id="loader" class="flex justify-center items-center h-96 hidden">
+        <div id="loader" class="flex justify-center items-center h-48 hidden">
             <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
         </div>
 
         <!-- Errore -->
-        <div id="errorMessage" class="bg-red-500/80 text-white p-4 rounded-xl shadow-lg text-center hidden">
+        <div id="error-message" class="bg-red-500/80 text-white p-4 rounded-xl shadow-lg text-center hidden">
             Impossibile trovare la località. Riprova.
         </div>
 
-        <!-- Dashboard Principale (nascosta di default) -->
-        <div id="weatherDashboard" class="space-y-8 hidden">
+        <!-- Dashboard Principale -->
+        <div id="weather-dashboard" class="space-y-6">
             
             <!-- Intestazione Località -->
-            <div class="text-center">
-                <h2 id="cityName" class="text-4xl sm:text-5xl font-extrabold tracking-tighter drop-shadow-md">--</h2>
-                <p id="currentDate" class="text-sm sm:text-base text-white/80 mt-1">--</p>
+            <div class="text-center space-y-1">
+                <h2 id="cityname" class="text-3xl sm:text-5xl font-extrabold tracking-tight drop-shadow-md">Caricamento...</h2>
+                <p id="current-date" class="text-sm sm:text-base text-white/80 font-medium">--</p>
             </div>
 
             <!-- Meteo Principale: Icona, Temp e Descrizione -->
-            <div class="grid md:grid-cols-3 gap-6 items-center bg-white/5 backdrop-blur-sm p-8 rounded-3xl border border-white/10 shadow-xl">
-                <div class="flex flex-col items-center justify-center md:col-span-1">
-                    <div id="mainIcon" class="text-9xl drop-shadow-xl mb-3">☀️</div>
-                    <p id="weatherDescription" class="text-xl font-medium text-white/90 text-center">--</p>
+            <div class="bg-white/10 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row items-center justify-around gap-6 text-center sm:text-left">
+                <div class="flex flex-col items-center gap-2">
+                    <span id="main-icon" class="text-7xl drop-shadow-xl">⛅</span>
+                    <span id="weather-description" class="text-xl font-medium text-white/90 text-center">--</span>
                 </div>
-                <div class="flex flex-col items-center justify-center md:col-span-2">
-                    <div class="flex items-end gap-2">
-                        <span id="temperature" class="text-9xl sm:text-[14rem] font-black tracking-tighter leading-none">--</span>
-                        <span class="text-6xl font-light text-white/70 pb-4">°C</span>
+                <div class="flex flex-col items-center sm:items-start gap-2">
+                    <div class="flex items-start gap-2">
+                        <span id="temp" class="text-6xl sm:text-7xl font-black tracking-tighter leading-none">--</span>
+                        <span class="text-2xl font-light text-white/85">°C</span>
                     </div>
-                    <div id="feelsLike" class="text-2xl text-white/70 mt-2 font-light">Percepita: --°C</div>
+                    <div id="feels-like" class="text-xl text-white/70 font-light">Percepita: --°</div>
                 </div>
             </div>
 
-            <!-- Dati Avanzati: Griglia
+            <!-- Dati Avanzati: Griglia -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <!-- Umidità -->
+                <div class="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/10 flex flex-col items-center gap-2 shadow-inner">
+                    <div class="text-3xl">💧</div>
+                    <div class="text-xs text-white/70">Umidità</div>
+                    <div id="humidity" class="text-xl font-bold">--%</div>
+                </div>
+                <!-- Vento -->
+                <div class="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/10 flex flex-col items-center gap-2 shadow-inner">
+                    <div class="text-3xl">💨</div>
+                    <div class="text-xs text-white/70">Vento</div>
+                    <div class="text-center"><span id="windSpeed" class="text-xl font-bold">--</span> <span class="text-xs text-white/70 font-normal">km/h</span></div>
+                    <div id="windDirection" class="text-xs text-white/60">--</div>
+                </div>
+                <!-- Pressione -->
+                <div class="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/10 flex flex-col items-center gap-2 shadow-inner">
+                    <div class="text-3xl">🌡️</div>
+                    <div class="text-xs text-white/70">Pressione</div>
+                    <div id="pressure" class="text-xl font-bold">--</div>
+                </div>
+                <!-- UV Index -->
+                <div class="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/10 flex flex-col items-center gap-2 shadow-inner">
+                    <div class="text-3xl">☀️</div>
+                    <div class="text-xs text-white/70">Indice UV</div>
+                    <div id="uvIndex" class="text-xl font-bold">--</div>
+                </div>
+            </div>
+
+            <!-- Sezione Radar Pioggia -->
+            <div class="bg-white/10 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold flex items-center gap-2"><span>📡</span> Radar Pioggia</h3>
+                    <span class="text-xs text-white/60 bg-white/10 px-2.5 py-1 rounded-full">Live</span>
+                </div>
+                <div id="radar-container">
+                    <iframe id="radar-iframe" src="" loading="lazy"></iframe>
+                </div>
+            </div>
+
+            <!-- Previsioni Orarie -->
+            <div class="bg-white/10 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-xl space-y-4">
+                <h3 class="text-lg font-semibold flex items-center gap-2"><span>🕒</span> Previsioni Orarie</h3>
+                <div id="hourly-forecast" class="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/20">
+                    <!-- Inserite via JS -->
+                </div>
+            </div>
+
+            <!-- Previsioni 7 Giorni -->
+            <div class="bg-white/10 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-xl space-y-4">
+                <h3 class="text-lg font-semibold flex items-center gap-2"><span>📅</span> Previsioni Prossimi Giorni</h3>
+                <div id="daily-forecast" class="space-y-3">
+                    <!-- Inserite via JS -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Script della Logica Meteo -->
+    <script>
+        const cityInput = document.getElementById('city-input');
+        const btnGeolocate = document.getElementById('btn-geolocate');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('error-message');
+        const weatherDashboard = document.getElementById('weather-dashboard');
+
+        const weatherCodes = {
+            0: { text: "Cielo sereno", icon: "☀️️", bg: "bg-sunny" },
+            1: { text: "Principalmente sereno", icon: "🌤️", bg: "bg-sunny" },
+            2: { text: "Parzialmente nuvoloso", icon: "⛅", bg: "bg-cloudy" },
+            3: { text: "Nuvoloso", icon: "☁️", bg: "bg-cloudy" },
+            45: { text: "Nebbia", icon: "🌫️", bg: "bg-cloudy" },
+            48: { text: "Nebbia con brina", icon: "🌫️", bg: "bg-cloudy" },
+            51: { text: "Pioviggine leggera", icon: "🌦️", bg: "bg-rainy" },
+            53: { text: "Pioviggine moderata", icon: "🌧️", bg: "bg-rainy" },
+            55: { text: "Pioviggine densa", icon: "🌧️", bg: "bg-rainy" },
+            61: { text: "Pioggia debole", icon: "🌧️", bg: "bg-rainy" },
+            63: { text: "Pioggia moderata", icon: "🌧️", bg: "bg-rainy" },
+            65: { text: "Pioggia forte", icon: "🌧️", bg: "bg-rainy" },
+            71: { text: "Nevicata debole", icon: "🌨️", bg: "bg-cloudy" },
+            73: { text: "Nevicata moderata", icon: "❄️", bg: "bg-cloudy" },
+            75: { text: "Nevicata forte", icon: "❄️", bg: "bg-cloudy" },
+            95: { text: "Temporale", icon: "⛈️", bg: "bg-rainy" }
+        };
+
+        function getWeatherInfo(code) {
+            return weatherCodes[code] || { text: "Variabile", icon: "⛅", bg: "bg-sunny" };
+        }
+
+        function getWindDirection(deg) {
+            const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+            return directions[Math.round((deg % 360) / 22.5)];
+        }
+
+        async function fetchCoordinates(city) {
+            loader.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+
+            try {
+                const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=it&format=json`);
+                const data = await res.json();
+                if (!data.results || data.results.length === 0) throw new Error("Città non trovata");
+                
+                const { latitude, longitude, name, country } = data.results[0];
+                fetchWeatherData(latitude, longitude, `${name} (${country || ''})`);
+            } catch (err) {
+                loader.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+            }
+        }
+
+        async function fetchWeatherData(lat, lon, cityName) {
+            loader.classList.remove('hidden');
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,pressure_msl,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                updateUI(data, cityName);
+            } catch (err) {
+                loader.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+            }
+        }
+
+        function updateUI(data, cityName) {
+            loader.classList.add('hidden');
+            weatherDashboard.classList.remove('hidden');
+
+            document.getElementById('cityname').textContent = cityName;
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+
+            const current = data.current;
+            const weather = getWeatherInfo(current.weather_code);
+            
+            document.body.className = `${weather.bg} text-white font-sans transition-colors duration-500 antialiased`;
+            document.getElementById('main-icon').textContent = weather.icon;
+            document.getElementById('weather-description').textContent = weather.text;
+            document.getElementById('temp').textContent = Math.round(current.temperature_2m);
+            document.getElementById('feels-like').textContent = `Percepita: ${Math.round(current.apparent_temperature)}°`;
+            document.getElementById('humidity').textContent = `${current.relative_humidity_2m}%`;
+            document.getElementById('windSpeed').textContent = Math.round(current.wind_speed_10m);
+            document.getElementById('windDirection').textContent = getWindDirection(current.wind_direction_10m);
+            document.getElementById('pressure').textContent = `${current.pressure_msl} hPa`;
+            document.getElementById('uvIndex').textContent = data.daily.uv_index_max[0] || '--';
+
+            // Radar
+            const lat = data.latitude;
+            const lon = data.longitude;
+            document.getElementById('radar-iframe').src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=7&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
+
+            // Orarie
+            const hourlyContainer = document.getElementById('hourly-forecast');
+            hourlyContainer.innerHTML = '';
+            const nowIndex = new Date().getHours();
+            for (let i = nowIndex; i < nowIndex + 24; i++) {
+                if (!data.hourly.time[i]) break;
+                const timeStr = new Date(data.hourly.time[i]).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                const hWeather = getWeatherInfo(data.hourly.weather_code[i]);
+                const hTemp = Math.round(data.hourly.temperature_2m[i]);
+
+                hourlyContainer.innerHTML += `
+                    <div class="flex flex-col items-center justify-between p-3 min-w-[70px] bg-white/5 rounded-2xl border border-white/10">
+                        <span class="text-xs text-white/70">${timeStr}</span>
+                        <span class="text-2xl my-1">${hWeather.icon}</span>
+                        <span class="text-sm font-bold">${hTemp}°</span>
+                    </div>
+                `;
+            }
+
+            // Giornaliere
+            const dailyContainer = document.getElementById('daily-forecast');
+            dailyContainer.innerHTML = '';
+            for (let i = 0; i < data.daily.time.length; i++) {
+                const dayName = i === 0 ? 'Oggi' : new Date(data.daily.time[i]).toLocaleDateString('it-IT', { weekday: 'long' });
+                const dWeather = getWeatherInfo(data.daily.weather_code[i]);
+                const maxT = Math.round(data.daily.temperature_2m_max[i]);
+                const minT = Math.round(data.daily.temperature_2m_min[i]);
+
+                dailyContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
+                        <span class="w-24 text-sm font-medium capitalize">${dayName}</span>
+                        <span class="text-2xl">${dWeather.icon}</span>
+                        <div class="flex items-center gap-3 text-sm">
+                            <span class="font-bold">${maxT}°</span>
+                            <span class="text-white/60">${minT}°</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && cityInput.value.trim() !== '') {
+                fetchCoordinates(cityInput.value.trim());
+            }
+        });
+
+        btnGeolocate.addEventListener('click', () => {
+            if (navigator.geolocation) {
+                loader.classList.remove('hidden');
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        fetchWeatherData(pos.coords.latitude, pos.coords.longitude, "La tua posizione");
+                    },
+                    err => {
+                        loader.classList.add('hidden');
+                        alert("Impossibile ottenere la posizione GPS.");
+                    }
+                );
+            } else {
+                alert("Geolocalizzazione non supportata dal tuo browser.");
+            }
+        });
+
+        // Avvio di default su Roma (o geolocalizzazione automatica all'avvio)
+        window.onload = () => {
+            fetchWeatherData(41.9028, 12.4964, 'Roma');
+        };
+    </script>
+</body>
+</html>
